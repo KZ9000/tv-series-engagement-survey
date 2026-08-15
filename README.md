@@ -149,6 +149,59 @@ Versionadas con Flyway:
   - rechazar serie inactiva
   - calcular dashboard
 
+## Configuración local (desarrollo)
+
+### Requisitos
+
+- Java 21 LTS
+- Maven 3.9+
+- PostgreSQL 17 (servicio corriendo)
+
+### Crear la base de datos
+
+Ejecutar como superusuario `postgres` (psql):
+
+```sql
+CREATE ROLE tvsurvey WITH LOGIN PASSWORD 'cambiar-contrasena';
+CREATE DATABASE netflix_engagement OWNER tvsurvey;
+```
+
+### Variables de entorno
+
+Definir a nivel de usuario en PowerShell (una sola vez):
+
+```powershell
+[Environment]::SetEnvironmentVariable("DB_URL", "jdbc:postgresql://localhost:5432/netflix_engagement", "User")
+[Environment]::SetEnvironmentVariable("DB_USERNAME", "tvsurvey", "User")
+[Environment]::SetEnvironmentVariable("DB_PASSWORD", "cambiar-contrasena", "User")
+[Environment]::SetEnvironmentVariable("JWT_SECRET", "cadena-aleatoria-de-al-menos-32-caracteres", "User")
+```
+
+Opcional, para crear un ADMIN inicial al arrancar:
+
+```powershell
+[Environment]::SetEnvironmentVariable("ADMIN_EMAIL", "admin@email.com", "User")
+[Environment]::SetEnvironmentVariable("ADMIN_PASSWORD", "Admin1234", "User")
+```
+
+Abrir una terminal nueva y comprobar con `echo $env:DB_URL`.
+
+### Ejecutar
+
+```powershell
+mvn spring-boot:run
+```
+
+La API queda en `http://localhost:8080/api`.
+
+### Ejecutar los tests
+
+```powershell
+mvn test
+```
+
+Los tests de integración usan H2 en modo PostgreSQL (perfil `test`), por lo que no requieren una instancia de PostgreSQL.
+
 ## Criterios de aceptación
 
 - [x] Un usuario puede registrarse
