@@ -1,67 +1,77 @@
 # ROADMAP.md — TV Series Engagement Survey
 
-## Development Phases
+Roadmap de desarrollo del MVP. Cada fase debe dejar una versión funcional antes de avanzar.
 
-### FASE 1: Configuración inicial del proyecto Spring Boot
-- Crear proyecto Maven con Java 21
-- Configurar dependencias: Spring Web, Spring Data JPA, PostgreSQL, Spring Security, JWT
-- Configurar application.yml con variables de entorno
+## FASE 1: Configuración inicial del proyecto Spring Boot
+- [x] Crear proyecto Maven con Java 21 (`pom.xml`, Spring Boot 3.5.16).
+- [x] Configurar dependencias: Spring Web, Spring Data JPA, PostgreSQL, Spring Security, JWT (jjwt 0.12.6), Flyway, Lombok.
+- [x] Configurar `application.yml` con variables de entorno: `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`.
+- [x] Crear `.gitignore` (excluye `target/`, `.idea/`, `.env`, secrets).
+- [x] Paquete raíz oficial: `com.example.tvseriesengagementsurvey`.
 
-### FASE 2: Base de datos y migraciones Flyway
-- Configurar PostgreSQL database `netflix_engagement`
-- Crear migraciones iniciales: V1__users, V2__series, V3__ratings
-- Configurar Flyway en application.yml
+## FASE 2: Base de datos y migraciones Flyway
+- [x] Crear base de datos `netflix_engagement` con usuario dedicado (`tvsurvey`).
+- [x] Migraciones versionadas en `src/main/resources/db/migration`:
+  - `V1__create_users_table.sql`
+  - `V2__create_series_table.sql`
+  - `V3__create_ratings_table.sql`
+- [x] Restricciones en BD: `UNIQUE (user_id, series_id)`, `CHECK (score 1-5)`, FKs.
+- [x] Configurar Flyway en `application.yml` (`ddl-auto: none`).
 
-### FASE 3: Entidades y relaciones JPA
-- Implementar entidades: User, Series, Rating, Role
-- Definir relaciones: User 1:N Rating, Series 1:N Rating
-- Agregar restricción UNIQUE (user_id, series_id) en Rating
-- Configurar hash de contraseñas (BCrypt)
+## FASE 3: Entidades y relaciones JPA
+- [x] Entidades: `User`, `Series`, `Rating`, enum `Role` (USER, ADMIN).
+- [x] Relaciones: User 1:N Rating, Series 1:N Rating.
+- [x] Campos `createdAt` con `@CreationTimestamp`.
+- [x] Repositorios: `UserRepository`, `SeriesRepository`, `RatingRepository`.
 
-### FASE 4: Catálogo de series (CRUD admin)
-- SeriesController: GET /api/series, GET /api/series/{id}
-- SeriesService y SeriesRepository
-- POST /api/series (ADMIN), PUT /api/series/{id} (ADMIN), PATCH /api/series/{id}/status (ADMIN)
-- Lógica: series activas/inactivas con campo `active`
+## FASE 4: Catálogo de series (CRUD admin)
+- [x] `GET /api/series` (activas, autenticado) y `GET /api/series/{id}`.
+- [x] `POST /api/series`, `PUT /api/series/{id}`, `PATCH /api/series/{id}/status` (ADMIN).
+- [x] Desactivación lógica con campo `active` (no se elimina la fila).
+- [x] DTOs: `CreateSeriesRequest`, `UpdateSeriesRequest`, `UpdateSeriesStatusRequest`, `SeriesResponse`.
 
-### FASE 5: Autenticación y JWT
-- AuthController: POST /api/auth/register, POST /api/auth/login
-- UserDetailsService y usuarioDetails
-- JwtService para generación y validación de tokens
-- JwtAuthenticationFilter para seguridad de endpoints
+## FASE 5: Autenticación y JWT
+- [x] `POST /api/auth/register` (crea usuario con rol USER, email único, 201 Created).
+- [x] `POST /api/auth/login` (retorna `{token, tokenType: "Bearer"}`).
+- [x] `UserDetailsService` + `DaoAuthenticationProvider` + `BCryptPasswordEncoder`.
+- [x] `JwtService` (generación y validación, HS256, expiración 2h por defecto).
+- [x] `JwtAuthenticationFilter` (valida Bearer token en cada request protegido).
+- [x] `SecurityConfig` stateless; `/api/auth/**` público; resto autenticado.
+- [x] Seed opcional de ADMIN vía variables `ADMIN_EMAIL` / `ADMIN_PASSWORD`.
 
-### FASE 6: Ratings y reglas de negocio
-- RatingController: POST /api/ratings
-- RatingService con validaciones principales:
-  - Score debe ser 1-5 (Jakarta Validation)
-  - Serie debe existir (404) y estar activa (409)
-  - Usuario solo puede votar una vez por serie (409 duplicado)
-- RatingRepository con restricción UNIQUE (user_id, series_id) en PostgreSQL
+## FASE 6: Ratings y reglas de negocio
+- [x] `POST /api/ratings` (usuario obtenido del JWT, nunca del body).
+- [x] Validaciones de `RatingService`:
+  - Score 1-5 (Bean Validation + guarda defensiva en service).
+  - Serie debe existir (404).
+  - Serie debe estar activa (409).
+  - Un voto por usuario y serie (409 duplicado).
+- [x] Protección final en PostgreSQL con `UNIQUE (user_id, series_id)`.
 
-### FASE 7: Dashboard de métricas
-- DashboardController: GET /api/dashboard
-- DashboardService con query SQL agregado:
-  - AVG(score) y COUNT(*) GROUP BY series_id
-- Retornar estructura: seriesId, title, averageScore, totalVotes
+## FASE 7: Dashboard de métricas
+- [x] `GET /api/dashboard` con `AVG(score)` y `COUNT(*)` agrupado por serie.
+- [x] Respuesta: `seriesId`, `title`, `averageScore`, `totalVotes`.
+- [x] Fuente de verdad: tabla `ratings` (el promedio no se almacena).
 
-### FASE 8: Manejo de errores y validaciones
-- GlobalExceptionHandler con @RestControllerAdvice
-- Excepciones personalizadas: ResourceNotFoundException, DuplicateRatingException, InactiveSeriesException
-- Formato estándar de error: timestamp, status, message
-- Validaciones Jakarta Bean Validation en DTOs
+## FASE 8: Manejo de errores y validaciones
+- [x] `GlobalExceptionHandler` con `@RestControllerAdvice`.
+- [x] Excepciones: `ResourceNotFoundException` (404), `DuplicateRatingException` (409), `InactiveSeriesException` (409), `EmailAlreadyExistsException` (409).
+- [x] Formato estándar: `{timestamp, status, message}`.
+- [x] 401 para no autenticado y 403 para roles insuficientes.
+- [x] Validaciones Jakarta en DTOs de entrada.
 
-### FASE 9: Tests básicos
-- Unit tests en Service layer:
+## FASE 9: Tests básicos
+- [x] Unit tests (JUnit 5 + Mockito) en Services:
   - crear rating correctamente
   - rechazar score inválido
   - rechazar rating duplicado
   - rechazar serie inexistente
   - rechazar serie inactiva
   - calcular dashboard
-- Integration tests para flujos principales de API
+- [x] Integration test (MockMvc + H2 en modo PostgreSQL): registro, login, creación de serie (ADMIN), rating, duplicado 409 y dashboard.
 
-### FASE 10: Documentación y portfolio
-- Revisar endpoints con Postman
-- Asegurar que credenciales no estén en Git
-- Preparar descripción para portfolio
-- Verificar estructura por capas y uso de DTOs
+## FASE 10: Documentación y portfolio
+- [ ] Revisar endpoints con Postman.
+- [ ] Asegurar que credenciales no estén en Git (env vars).
+- [ ] Documentar configuración local en README.
+- [ ] Verificar estructura por capas y uso de DTOs.

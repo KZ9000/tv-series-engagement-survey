@@ -959,7 +959,7 @@ El esquema de PostgreSQL no dependerá exclusivamente de modificaciones automát
 src/
 └── main/
     ├── java/
-    │   └── com.example.TVSeriesEngagementSurvey/
+    │   └── com.example.tvseriesengagementsurvey/
     │
     │       ├── controller/
     │       │   ├── AuthController.java

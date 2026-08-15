@@ -13,7 +13,7 @@
 Estructura obligatoria por capas (definida en SPECS.md):
 
 ```
-src/main/java/com/example/netflixsurvey/
+src/main/java/com/example/tvseriesengagementsurvey/
 ├── controller/
 ├── service/
 ├── repository/
