@@ -1,0 +1,25 @@
+target/
+*.class
+*.jar
+*.war
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets / local config
+.env
+*.key
+*.pem
+application-local.yml
+
+# Logs
+*.log
