@@ -69,9 +69,11 @@ Roadmap de desarrollo del MVP. Cada fase debe dejar una versión funcional antes
   - rechazar serie inactiva
   - calcular dashboard
 - [x] Integration test (MockMvc + H2 en modo PostgreSQL): registro, login, creación de serie (ADMIN), rating, duplicado 409 y dashboard.
+- [x] Verificado: `mvn test` compila y corre 10/10 tests OK.
+- [x] Verificado: la app arranca contra PostgreSQL 17.11 (Flyway aplica V1-V3) y los endpoints responden (register 201, login JWT, /api/series 200/401).
 
 ## FASE 10: Documentación y portfolio
 - [ ] Revisar endpoints con Postman.
-- [ ] Asegurar que credenciales no estén en Git (env vars).
-- [ ] Documentar configuración local en README.
-- [ ] Verificar estructura por capas y uso de DTOs.
+- [x] Asegurar que credenciales no estén en Git (env vars).
+- [x] Documentar configuración local en README.
+- [x] Verificar estructura por capas y uso de DTOs.
