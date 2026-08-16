@@ -38,6 +38,7 @@ Roadmap de desarrollo del MVP. Cada fase debe dejar una versión funcional antes
 - [x] `JwtAuthenticationFilter` (valida Bearer token en cada request protegido).
 - [x] `SecurityConfig` stateless; `/api/auth/**` público; resto autenticado.
 - [x] Seed opcional de ADMIN vía variables `ADMIN_EMAIL` / `ADMIN_PASSWORD`.
+- [x] Verificado: al arrancar se crea el ADMIN en PostgreSQL (rol `ADMIN`), login OK y puede crear series; un USER normal recibe 403.
 
 ## FASE 6: Ratings y reglas de negocio
 - [x] `POST /api/ratings` (usuario obtenido del JWT, nunca del body).
