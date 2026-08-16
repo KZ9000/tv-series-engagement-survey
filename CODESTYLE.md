@@ -200,14 +200,14 @@ src/main/resources/db/migration/
 
 ```yaml
 # ❌ MAL
-db.url=jdbc:postgresql://localhost:5432/netflix_engagement
+db.url=jdbc:postgresql://localhost:5432/tv_series_engagement
 db.user=admin
 db.password=secret
 
 # ✅ BIEN
 spring:
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/netflix_engagement}
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/tv_series_engagement}
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:}
     hikari:

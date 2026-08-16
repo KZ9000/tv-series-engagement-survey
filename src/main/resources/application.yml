@@ -2,8 +2,8 @@ spring:
   application:
     name: tv-series-engagement-survey
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/netflix_engagement}
-    username: ${DB_USERNAME:tvsurvey}
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/tv_series_engagement}
+    username: ${DB_USERNAME:tv_series_app}
     password: ${DB_PASSWORD:}
   jpa:
     hibernate:

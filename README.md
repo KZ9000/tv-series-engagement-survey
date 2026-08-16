@@ -162,8 +162,8 @@ Versionadas con Flyway:
 Ejecutar como superusuario `postgres` (psql):
 
 ```sql
-CREATE ROLE tvsurvey WITH LOGIN PASSWORD 'cambiar-contrasena';
-CREATE DATABASE netflix_engagement OWNER tvsurvey;
+CREATE ROLE tv_series_app WITH LOGIN PASSWORD 'cambiar-contrasena';
+CREATE DATABASE tv_series_engagement OWNER tv_series_app;
 ```
 
 ### Variables de entorno
@@ -171,8 +171,8 @@ CREATE DATABASE netflix_engagement OWNER tvsurvey;
 Definir a nivel de usuario en PowerShell (una sola vez):
 
 ```powershell
-[Environment]::SetEnvironmentVariable("DB_URL", "jdbc:postgresql://localhost:5432/netflix_engagement", "User")
-[Environment]::SetEnvironmentVariable("DB_USERNAME", "tvsurvey", "User")
+[Environment]::SetEnvironmentVariable("DB_URL", "jdbc:postgresql://localhost:5432/tv_series_engagement", "User")
+[Environment]::SetEnvironmentVariable("DB_USERNAME", "tv_series_app", "User")
 [Environment]::SetEnvironmentVariable("DB_PASSWORD", "cambiar-contrasena", "User")
 [Environment]::SetEnvironmentVariable("JWT_SECRET", "cadena-aleatoria-de-al-menos-32-caracteres", "User")
 ```

@@ -16,7 +16,7 @@ El sistema permitirá:
 
 El proyecto está pensado como una **demo de portfolio para practicar y demostrar conocimientos de Java y Spring Boot**.
 
-El objetivo no es construir una plataforma similar a Netflix, sino desarrollar un backend pequeño, coherente y técnicamente defendible.
+El objetivo no es construir una plataforma comercial de streaming, sino desarrollar un backend pequeño, coherente y técnicamente defendible.
 
 ---
 
@@ -377,7 +377,7 @@ PostgreSQL
 Nombre sugerido:
 
 ```text
-netflix_engagement
+tv_series_engagement
 ```
 
 PostgreSQL se utilizará como base de datos relacional principal.

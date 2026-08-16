@@ -10,7 +10,7 @@ Roadmap de desarrollo del MVP. Cada fase debe dejar una versión funcional antes
 - [x] Paquete raíz oficial: `com.example.tvseriesengagementsurvey`.
 
 ## FASE 2: Base de datos y migraciones Flyway
-- [x] Crear base de datos `netflix_engagement` con usuario dedicado (`tvsurvey`).
+- [x] Crear base de datos `tv_series_engagement` con usuario dedicado (`tv_series_app`).
 - [x] Migraciones versionadas en `src/main/resources/db/migration`:
   - `V1__create_users_table.sql`
   - `V2__create_series_table.sql`
