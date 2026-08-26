@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Series — TV Survey</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="nav">
+        <a href="/" class="nav-brand">TV Survey</a>
+        <ul class="nav-links" id="nav-auth">
+            <li><a href="/series">Series</a></li>
+            <li><a href="/dashboard">Dashboard</a></li>
+            <li><button onclick="logout()">Salir</button></li>
+        </ul>
+        <ul class="nav-links" id="nav-guest" style="display:none;">
+            <li><a href="/login">Iniciar sesión</a></li>
+        </ul>
+    </nav>
+
+    <div class="container-wide">
+        <div class="page-header">
+            <h1>Catálogo de series</h1>
+            <p>Explora las series disponibles y califícalas.</p>
+        </div>
+
+        <div id="series-list">
+            <div class="empty-state">Cargando series...</div>
+        </div>
+    </div>
+
+    <script src="/js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            updateNav();
+            if (!isAuthenticated()) {
+                window.location.href = '/login';
+                return;
+            }
+            loadSeries();
+        });
+    </script>
+</body>
+</html>

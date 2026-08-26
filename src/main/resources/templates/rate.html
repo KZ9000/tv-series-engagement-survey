@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calificar — TV Survey</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="nav">
+        <a href="/" class="nav-brand">TV Survey</a>
+        <ul class="nav-links" id="nav-auth">
+            <li><a href="/series">Series</a></li>
+            <li><a href="/dashboard">Dashboard</a></li>
+            <li><button onclick="logout()">Salir</button></li>
+        </ul>
+        <ul class="nav-links" id="nav-guest" style="display:none;">
+            <li><a href="/login">Iniciar sesión</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>Calificar serie</h1>
+            <p>Serie: <strong id="series-title">...</strong></p>
+        </div>
+
+        <div id="alert" class="alert"></div>
+        <div id="alert-success" class="alert"></div>
+
+        <form id="form-rate" onsubmit="handleRate(event)">
+            <input type="hidden" id="series-id">
+            <input type="hidden" id="score-input" value="">
+
+            <div class="form-group">
+                <label>Selecciona tu puntuación</label>
+                <div class="score-selector">
+                    <button type="button" class="score-btn" data-score="1">1</button>
+                    <button type="button" class="score-btn" data-score="2">2</button>
+                    <button type="button" class="score-btn" data-score="3">3</button>
+                    <button type="button" class="score-btn" data-score="4">4</button>
+                    <button type="button" class="score-btn" data-score="5">5</button>
+                </div>
+            </div>
+
+            <button type="submit" id="btn-submit" class="btn btn-primary" data-original-text="Enviar calificación">
+                Enviar calificación
+            </button>
+        </form>
+
+        <p style="text-align:center; margin-top:1.5rem;">
+            <a href="/series">← Volver al catálogo</a>
+        </p>
+    </div>
+
+    <script src="/js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            updateNav();
+            if (!isAuthenticated()) {
+                window.location.href = '/login';
+                return;
+            }
+            initRate();
+        });
+    </script>
+</body>
+</html>

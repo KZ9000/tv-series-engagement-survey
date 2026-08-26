@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TV Series Engagement Survey</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="nav">
+        <a href="/" class="nav-brand">TV Survey</a>
+        <ul class="nav-links" id="nav-guest" style="display:none;">
+            <li><a href="/login">Iniciar sesión</a></li>
+            <li><a href="/register">Registrarse</a></li>
+        </ul>
+        <ul class="nav-links" id="nav-auth" style="display:none;">
+            <li><a href="/series">Series</a></li>
+            <li><a href="/dashboard">Dashboard</a></li>
+            <li><button onclick="logout()">Salir</button></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <div class="page-header" style="text-align:center; padding:3rem 0 2rem;">
+            <h1>TV Series Engagement Survey</h1>
+            <p style="margin-top:0.5rem; font-size:1.1rem;">Califica tus series favoritas y descubre qué piensa la comunidad.</p>
+        </div>
+
+        <div id="guest-section" style="display:none; text-align:center; margin-top:2rem;">
+            <a href="/login" class="btn btn-primary btn-sm" style="width:auto; display:inline-flex; margin:0.5rem;">Iniciar sesión</a>
+            <a href="/register" class="btn btn-outline btn-sm" style="width:auto; display:inline-flex; margin:0.5rem;">Crear cuenta</a>
+        </div>
+
+        <div id="auth-section" style="display:none; text-align:center; margin-top:2rem;">
+            <a href="/series" class="btn btn-primary btn-sm" style="width:auto; display:inline-flex; margin:0.5rem;">Ver series</a>
+            <a href="/dashboard" class="btn btn-outline btn-sm" style="width:auto; display:inline-flex; margin:0.5rem;">Dashboard</a>
+        </div>
+    </div>
+
+    <script src="/js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            updateNav();
+            if (isAuthenticated()) {
+                document.getElementById('auth-section').style.display = 'block';
+            } else {
+                document.getElementById('guest-section').style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
