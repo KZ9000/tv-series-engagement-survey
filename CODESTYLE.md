@@ -25,7 +25,17 @@ src/main/java/com/example/tvseriesengagementsurvey/
 │   └── dashboard/
 ├── exception/
 ├── security/
-└── config/ (opcional)
+└── config/
+```
+
+```
+src/main/resources/
+├── templates/          (Thymeleaf HTML)
+├── static/
+│   ├── css/            (estilos propios)
+│   └── js/             (JavaScript vanilla)
+├── db/migration/       (Flyway)
+└── application.yml
 ```
 
 ### 1.3. Importaciones
@@ -134,26 +144,29 @@ public Double calculateAverage(Long seriesId) { ... }
 
 ## 5. Seguridad y Buenas Prácticas
 
-### 5.1. Contraseñas
+### 5.1. Credenciales y secretos
+- **Nunca** commit de credenciales, secretos o configuraciones de producción en Git.
+- **Nunca** incluir contraseñas reales, JWT reales ni valores sensibles en el código.
+- Utilizar variables de entorno para información sensible (`DB_PASSWORD`, `JWT_SECRET`, `ADMIN_PASSWORD`).
+- El archivo `.gitignore` debe excluir `.env`, `*.key`, `*.pem`.
+
+### 5.2. Contraseñas
 - **Siempre** usar BCryptPasswordEncoder.
 - Nunca almacenar texto plano.
 - Nunca logar passwords en ningún caso.
 
-### 5.2. JWT
+### 5.3. JWT
 - Secret key solo via variables de entorno (`JWT_SECRET`).
 - Token expiration razonable (1-2 horas).
 - `JwtAuthenticationFilter` validar todos los requests protegidos.
 - Nunca poner información sensible en el payload del JWT.
+- Frontend almacena JWT en `localStorage` (aceptable para MVP stateless).
 
-### 5.3. Transacciones
-- `@Transactional` en métodos de servicio que modifican datos.
-- Scope: `required` o `requiredByDefault`.
-- Nunca en controllers puro.
-
-### 5.4. Validaciones
-- Jakarta Bean Validation en DTOs request.
-- Validaciones cruzadas en service cuando requieran lógica compleja.
-- Mensajes de error claros y específicos.
+### 5.4. Frontend
+- No incluir credenciales en JavaScript o HTML.
+- No incluir JWT reales en el código.
+- No exponer variables de entorno del backend en el frontend.
+- El frontend únicamente consume la API REST existente.
 
 ## 6. Testing
 
@@ -171,15 +184,57 @@ public Double calculateAverage(Long seriesId) { ... }
 - Services principales: mínimo 80% coverage en lógica crítica.
 - No tests solo por cobertura — tests deben validar comportamiento.
 
-## 7. Migraciones (Flyway)
+## 7. Frontend (Thymeleaf + CSS + JavaScript)
 
-### 7.1. Convenciones
+### 7.1. Templates HTML
+- Ubicación: `src/main/resources/templates/`.
+- Nombres de archivo: `snake_case.html` (ej: `login.html`, `register.html`).
+- Idioma: `lang="es"` en la etiqueta `<html>`.
+- Incluir `<meta charset="UTF-8">` y `<meta name="viewport">`.
+- Thymeleaf se utiliza únicamente para servir las páginas web.
+- No incluir lógica de negocio en templates.
+
+### 7.2. CSS
+- Ubicación: `src/main/resources/static/css/style.css`.
+- Nombres de clases: `kebab-case` (ej: `card-title`, `btn-primary`, `form-group`).
+- Variables CSS en `:root` para colores y espaciado.
+- Diseño responsive con `@media` queries.
+- No utilizar frameworks CSS externos (Bootstrap, Tailwind, etc.).
+
+### 7.3. JavaScript vanilla
+- Ubicación: `src/main/resources/static/js/app.js`.
+- Nombres de funciones: `camelCase` (ej: `handleLogin`, `loadSeries`, `updateNav`).
+- Nombres de constantes: `UPPER_SNAKE_CASE` (ej: `API`, `TOKEN_KEY`).
+- No utilizar frameworks JavaScript (React, Angular, Vue, etc.).
+- Consumir la API REST existente mediante `fetch`.
+- Almacenar JWT en `localStorage`.
+- Enviar `Authorization: Bearer <token>` en requests autenticados.
+- Manejar 401: limpiar token y redirigir a `/login`.
+- No duplicar lógica de negocio del backend.
+
+### 7.4. Organización de static/
+```
+src/main/resources/static/
+├── css/
+│   └── style.css
+└── js/
+    └── app.js
+```
+
+### 7.5. Evitar duplicación
+- No copiar reglas de negocio al frontend.
+- El frontend consume la API REST existente.
+- Las validaciones de seguridad se mantienen en el backend.
+
+## 8. Migraciones (Flyway)
+
+### 8.1. Convenciones
 - Versionado: `V1__`, `V2__`, `V3__` etc.
 - Nombre descriptivo: `V1__create_users_table.sql`.
 - Nunca commitar migrations sin probar en entorno limpio.
 - `flyway.locations` en `application.yml` apuntar a `classpath:db/migration/`.
 
-### 7.2. Estructura
+### 8.2. Estructura
 ```
 src/main/resources/db/migration/
 ├── V1__create_users_table.sql
@@ -188,14 +243,14 @@ src/main/resources/db/migration/
 └── V4__add_unique_constraint.sql (futuras)
 ```
 
-## 8. Formato de Archivos de Configuración
+## 9. Formato de Archivos de Configuración
 
-### 8.1. application.yml
+### 9.1. application.yml
 - Usar **formato YAML** (no XML).
 - Variables sensibles via `env` o system properties.
 - Estructura anidada clara, 2 espacios de indentación.
 
-### 8.2. application.properties (solo si es necesario)
+### 9.2. application.properties (solo si es necesario)
 - Exception: usar YAML cuando sea posible.
 
 ```yaml
@@ -221,7 +276,7 @@ spring:
         format_sql: true
 ```
 
-## 9. Consideraciones Finalas (Production Ready)
+## 10. Consideraciones Finales (Production Ready)
 
 1. **Nunca** commit de credenciales, secrets o configuraciones de producción en Git.
 2. **Siempre** usar `.gitignore` para excluir `target/`, `.env`, `*.key`, `*.pem`.

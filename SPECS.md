@@ -114,25 +114,35 @@ Estas funcionalidades pueden mencionarse como futuras evoluciones, pero no forma
 
 # 5. Stack tecnológico
 
-| Tecnología              | Uso                  |
-| ----------------------- | -------------------- |
-| Java 21 LTS             | Lenguaje principal   |
-| Spring Boot             | Framework backend    |
-| Spring Web              | API REST             |
-| Spring Data JPA         | Persistencia         |
-| Hibernate               | ORM                  |
-| PostgreSQL              | Base de datos        |
-| Spring Security         | Seguridad            |
-| JWT                     | Autenticación        |
-| Maven                   | Gestión del proyecto |
-| Jakarta Bean Validation | Validaciones         |
-| JUnit 5                 | Tests                |
-| Mockito                 | Tests unitarios      |
-| Postman                 | Pruebas de API       |
-| Git                     | Control de versiones |
-| GitHub                  | Repositorio          |
+| Tecnología              | Uso                          |
+| ----------------------- | ---------------------------- |
+| Java 21 LTS             | Lenguaje principal           |
+| Spring Boot 3.5.16      | Framework backend            |
+| Spring Web              | API REST                     |
+| Spring Data JPA         | Persistencia                 |
+| Hibernate               | ORM                          |
+| PostgreSQL 17.11        | Base de datos                |
+| Spring Security         | Seguridad                    |
+| JWT                     | Autenticación                |
+| Maven 3.9.9             | Gestión del proyecto         |
+| Jakarta Bean Validation | Validaciones                 |
+| Flyway                  | Migraciones de BD            |
+| Lombok                  | Reducción de boilerplate     |
+| Swagger/OpenAPI         | Documentación de la API      |
+| JUnit 5                 | Tests                        |
+| Mockito                 | Tests unitarios              |
+| MockMvc                 | Tests de integración         |
+| H2                      | BD en memoria para tests     |
+| Thymeleaf               | Templates server-side        |
+| HTML5                   | Estructura de páginas        |
+| CSS                     | Estilos propios              |
+| JavaScript vanilla      | Lógica del frontend          |
+| Git                     | Control de versiones         |
+| GitHub                  | Repositorio                  |
 
 Las dependencias utilizarán versiones estables y compatibles con Java 21.
+
+No se utilizan frameworks frontend como React, Angular, Vue ni Vite.
 
 ---
 
@@ -141,7 +151,13 @@ Las dependencias utilizarán versiones estables y compatibles con Java 21.
 Se utilizará una arquitectura monolítica sencilla basada en capas.
 
 ```text
-Cliente
+Browser
+   │
+   ▼
+Thymeleaf + HTML/CSS/JavaScript
+   │
+   ▼
+REST API
    │
    ▼
 Controller
@@ -156,16 +172,34 @@ Repository
 PostgreSQL
 ```
 
-## Controller
+## Frontend (Thymeleaf)
+
+Responsabilidades:
+
+* Servir las páginas web (HTML).
+* JavaScript consume la API REST existente mediante `fetch`.
+* Almacenar el JWT en `localStorage` para requests autenticados.
+* Redirigir a `/login` cuando el JWT expira (401).
+* No duplicar lógica de negocio del backend.
+
+## Controller (REST API)
 
 Responsabilidades:
 
 * Recibir requests HTTP.
 * Validar la entrada mediante DTOs.
 * Invocar los servicios.
-* Devolver respuestas HTTP.
+* Devolver respuestas HTTP (JSON).
 
 No deberá contener lógica de negocio.
+
+## Controller (Web)
+
+Responsabilidades:
+
+* Servir las páginas Thymeleaf.
+* Mapear rutas del frontend (`/`, `/login`, `/register`, `/series`, `/rate`, `/dashboard`).
+* No contener lógica de negocio.
 
 ## Service
 
@@ -965,7 +999,8 @@ src/
     │       │   ├── AuthController.java
     │       │   ├── SeriesController.java
     │       │   ├── RatingController.java
-    │       │   └── DashboardController.java
+    │       │   ├── DashboardController.java
+    │       │   └── WebController.java
     │       │
     │       ├── service/
     │       │   ├── AuthService.java
@@ -993,15 +1028,33 @@ src/
     │       ├── exception/
     │       │   ├── ResourceNotFoundException.java
     │       │   ├── DuplicateRatingException.java
+    │       │   ├── InactiveSeriesException.java
+    │       │   ├── EmailAlreadyExistsException.java
     │       │   └── GlobalExceptionHandler.java
     │       │
-    │       └── security/
-    │           ├── SecurityConfig.java
-    │           ├── JwtService.java
-    │           └── JwtAuthenticationFilter.java
+    │       ├── security/
+    │       │   ├── SecurityConfig.java
+    │       │   ├── SecurityBeansConfig.java
+    │       │   ├── JwtService.java
+    │       │   └── JwtAuthenticationFilter.java
+    │       │
+    │       └── config/
+    │           └── OpenApiConfig.java
     │
     └── resources/
         ├── application.yml
+        ├── templates/
+        │   ├── index.html
+        │   ├── login.html
+        │   ├── register.html
+        │   ├── series.html
+        │   ├── rate.html
+        │   └── dashboard.html
+        ├── static/
+        │   ├── css/
+        │   │   └── style.css
+        │   └── js/
+        │       └── app.js
         └── db/
             └── migration/
 ```
@@ -1145,6 +1198,17 @@ El MVP estará terminado cuando se cumpla lo siguiente:
 * Se muestra la cantidad de votos de cada serie.
 * Los valores corresponden a los datos almacenados en PostgreSQL.
 
+### Frontend
+
+* Existen páginas HTML para el flujo completo.
+* Thymeleaf sirve las páginas web.
+* JavaScript consume la API REST existente.
+* JWT se almacena en `localStorage`.
+* Se envía `Authorization: Bearer` en requests autenticados.
+* Si el JWT expira, se redirige a `/login`.
+* El diseño es responsive.
+* No se utilizan frameworks frontend externos.
+
 ### Código
 
 * El proyecto está organizado por capas.
@@ -1188,10 +1252,10 @@ FASE 9
 Implementar dashboard
         ↓
 FASE 10
-Manejo de errores y validaciones
+Swagger/OpenAPI
         ↓
 FASE 11
-Tests principales
+Frontend Thymeleaf
         ↓
 FASE 12
 Documentación y preparación del portfolio

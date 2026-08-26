@@ -73,8 +73,36 @@ Roadmap de desarrollo del MVP. Cada fase debe dejar una versión funcional antes
 - [x] Verificado: `mvn test` compila y corre 10/10 tests OK.
 - [x] Verificado: la app arranca contra PostgreSQL 17.11 (Flyway aplica V1-V3) y los endpoints responden (register 201, login JWT, /api/series 200/401).
 
-## FASE 10: Documentación y portfolio
-- [ ] Revisar endpoints con Postman.
+## FASE 10: Swagger/OpenAPI
+- [x] Agregada dependencia `springdoc-openapi-starter-webmvc-ui:2.8.17`.
+- [x] Creado `OpenApiConfig.java` con esquema de seguridad `bearerAuth` (HTTP Bearer JWT).
+- [x] Anotaciones `@Tag`, `@Operation`, `@SecurityRequirement` en todos los controllers.
+- [x] `SecurityConfig` actualizado: `permitAll` para `/swagger-ui/**`, `/v3/api-docs/**`, `/webjars/**`.
+- [x] Verificado: Swagger UI accesible en `http://localhost:8080/swagger-ui.html`.
+
+## FASE 11: Frontend Thymeleaf
+- [x] Agregada dependencia `spring-boot-starter-thymeleaf`.
+- [x] Creado `WebController.java` con mappings para páginas web.
+- [x] `SecurityConfig` actualizado: `permitAll` para `/`, `/login`, `/register`, `/series`, `/rate`, `/dashboard`, `/css/**`, `/js/**`.
+- [x] Creados templates Thymeleaf: `index.html`, `login.html`, `register.html`, `series.html`, `rate.html`, `dashboard.html`.
+- [x] Creado CSS propio (`style.css`): dark theme, responsive, sin frameworks externos.
+- [x] Creado JavaScript vanilla (`app.js`): JWT en localStorage, fetch API, manejo de errores, nav dinámica.
+- [x] Manejo de JWT expirado: detecta 401, limpia token, redirige a `/login`.
+- [x] Verificado: todas las páginas retornan 200, Swagger funciona, API responde correctamente.
+- [x] Pruebas manuales: registro, login, catálogo, rating, voto duplicado, dashboard, logout.
+
+## FASE 12: Documentación y portfolio
 - [x] Asegurar que credenciales no estén en Git (env vars).
 - [x] Documentar configuración local en README.
 - [x] Verificar estructura por capas y uso de DTOs.
+- [x] Actualizar README.md, SPECS.md, ROADMAP.md, CODESTYLE.md con estado actual.
+
+## Mejoras futuras (opcionales)
+
+Estas mejoras no son requisitos para el MVP, pero podrían implementarse:
+
+- [ ] Paginación del catálogo de series.
+- [ ] Loading indicators / spinners más elaborados.
+- [ ] Validaciones client-side más detalladas.
+- [ ] Otras mejoras visuales opcionales.
+- [ ] Cloud deployment (pendiente).

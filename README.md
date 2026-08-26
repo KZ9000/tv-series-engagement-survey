@@ -4,152 +4,160 @@
 
 **TV Series Engagement Survey** es una aplicación web tipo MVP orientada a medir qué tanto conectan los usuarios con determinadas series de televisión. El sistema permite registrar usuarios, iniciar sesión, consultar un catálogo de series y calificar series con un score entre 1 y 5.
 
-## Tecnologías utilizadas
-
-- **Java 21 LTS** - Lenguaje principal
-- **Spring Boot** - Framework backend
-- **Spring Web** - API REST
-- **Spring Data JPA** / **Hibernate** - Persistencia
-- **PostgreSQL** - Base de datos relacional
-- **Spring Security** - Seguridad y autenticación
-- **JWT** - Autenticación basada en tokens
-- **Maven** - Gestión del proyecto
-- **Jakarta Bean Validation** - Validaciones de datos
-- **JUnit 5** / **Mockito** - Testing
-- **Flyway** - Migraciones de base de datos
-
-## Arquitectura por capas
+## Flujo principal
 
 ```
-Cliente
+Registro
+   ↓
+Login
+   ↓
+Catálogo de series
+   ↓
+Seleccionar serie
+   ↓
+Calificar de 1 a 5
+   ↓
+Evitar voto duplicado
+   ↓
+Dashboard
+```
+
+## Stack tecnológico
+
+### Backend
+- **Java 21 LTS** - Lenguaje principal
+- **Spring Boot 3.5.16** - Framework backend
+- **Spring Web** - API REST
+- **Spring Data JPA** / **Hibernate** - Persistencia
+- **PostgreSQL 17.11** - Base de datos relacional
+- **Spring Security** - Seguridad y autenticación
+- **JWT** - Autenticación basada en tokens
+- **Flyway** - Migraciones de base de datos
+- **Jakarta Bean Validation** - Validaciones de datos
+- **Lombok** - Reducción de boilerplate
+- **Swagger/OpenAPI** - Documentación de la API
+
+### Testing
+- **JUnit 5** - Framework de tests
+- **Mockito** - Tests unitarios
+- **MockMvc** - Tests de integración de API
+- **H2** - Base de datos en memoria para tests
+
+### Frontend
+- **Thymeleaf** - Motor de templates server-side
+- **HTML5** - Estructura de páginas
+- **CSS** - Estilos propios (sin frameworks externos)
+- **JavaScript vanilla** - Lógica del frontend (sin frameworks)
+
+### Herramientas
+- **Maven 3.9.9** - Gestión del proyecto
+- **Git / GitHub** - Control de versiones
+
+## Arquitectura
+
+```
+Browser
+   │
+   ▼
+Thymeleaf + HTML/CSS/JavaScript
+   │
+   ▼
+REST API
    │
    ▼
 Controller → Service → Repository → PostgreSQL
 ```
 
+Thymeleaf sirve las páginas web. JavaScript consume la API REST existente mediante `fetch`. No se duplica lógica de negocio en el frontend.
+
+## Páginas
+
+| Ruta | Descripción |
+|------|-------------|
+| `/` | Página de inicio. Muestra opciones de login/registro para invitados, o enlaces a series/dashboard para usuarios autenticados. |
+| `/login` | Formulario de inicio de sesión. Consume `POST /api/auth/login`. |
+| `/register` | Formulario de registro. Consume `POST /api/auth/register`. |
+| `/series` | Catálogo de series activas. Consume `GET /api/series`. Muestra tarjetas con título, descripción, fecha de estreno, estado y botón para calificar. |
+| `/rate` | Formulario de calificación para una serie específica. Selector de score 1-5. Consume `POST /api/ratings`. |
+| `/dashboard` | Métricas de engagement: promedio de calificación y cantidad de votos por serie. Consume `GET /api/dashboard`. |
+
 ## Endpoints API
 
-### Autenticación (`/api/auth`)
-- `POST /api/auth/register` - Registrar nuevo usuario
+### Autenticación (`/api/auth`) — Públicos
+
+- `POST /api/auth/register` - Registrar nuevo usuario (201 Created)
 - `POST /api/auth/login` - Iniciar sesión y obtener JWT
 
-### Series (`/api/series`)
-- `GET /api/series` - Listar series activas (todos los usuarios)
-- `GET /api/series/{id}` - Consultar una serie en particular
+### Series (`/api/series`) — Requiere autenticación
+
+- `GET /api/series` - Listar series activas (USER o ADMIN)
+- `GET /api/series/{id}` - Consultar una serie (USER o ADMIN)
 - `POST /api/series` - Crear nueva serie (ADMIN solo)
 - `PUT /api/series/{id}` - Actualizar serie (ADMIN solo)
 - `PATCH /api/series/{id}/status` - Activar/desactivar serie (ADMIN solo)
 
-### Ratings (`/api/ratings`)
-- `POST /api/ratings` - Crear una calificación (usuario autenticado)
+### Ratings (`/api/ratings`) — Requiere autenticación
+
+- `POST /api/ratings` - Crear una calificación
   - Body: `{"seriesId": 1, "score": 5}`
   - Score válido: 1, 2, 3, 4, 5
   - No votar serie inactiva (409 Conflict)
   - No votar dos veces la misma serie (409 Conflict)
 
-### Dashboard (`/api/dashboard`)
+### Dashboard (`/api/dashboard`) — Requiere autenticación
+
 - `GET /api/dashboard` - Ver promedio y conteo de votos por serie
 
-## Respuesta del Dashboard
+## Autenticación
 
-```json
-[
-  {
-    "seriesId": 1,
-    "title": "Serie A",
-    "averageScore": 4.6,
-    "totalVotes": 120
-  },
-  {
-    "seriesId": 2,
-    "title": "Serie B",
-    "averageScore": 4.2,
-    "totalVotes": 95
-  }
-]
+- Backend **stateless** con JWT (no hay sesiones server-side).
+- El cliente envía `Authorization: Bearer <token>` en cada request protegido.
+- Roles: `ROLE_USER` y `ROLE_ADMIN`.
+- `/api/auth/**` es público. El resto requiere autenticación.
+- POST/PUT/PATCH a `/api/series/**` requiere rol ADMIN.
+
+### Comportamiento del frontend ante JWT expirado
+
+```
+API devuelve 401
+      ↓
+Frontend detecta 401 (distinto de /auth/login y /auth/register)
+      ↓
+Elimina jwt_token de localStorage
+      ↓
+Redirige a /login
 ```
 
-## Modelo de datos
+## Validaciones y reglas
 
-### Entidades principales
+- Score debe estar entre 1 y 5 (@Min, @Max).
+- La serie debe existir (404 Not Found).
+- La serie debe estar activa (409 Conflict).
+- Un usuario no puede calificar dos veces la misma serie (409 Conflict).
+- Usuario no autenticado recibe 401 Unauthorized.
+- Usuario sin permisos administrativos recibe 403 Forbidden.
 
-**User**
-- id (generado automáticamente)
-- email (obligatorio, único)
-- password (hashed, nunca en texto plano)
-- role (USER o ADMIN)
-- createdAt (generado al crear)
+## Swagger/OpenAPI
 
-**Series**
-- id
-- title (obligatorio)
-- description (opcional)
-- releaseDate (fecha de estreno)
-- active (determina si recibe votos)
+- Swagger UI: `http://localhost:8080/swagger-ui.html`
+- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
 
-**Rating**
-- id
-- score (1-5, validado)
-- userId (fk → users)
-- seriesId (fk → series)
-- createdAt
+## Tests
 
-### Restricciones DB
-- `UNIQUE (user_id, series_id)` en tabla ratings
-- `CHECK (score >= 1 AND score <= 5)`
-- Foreign keys a users y series
+```
+Tests run: 10, Failures: 0, Errors: 0, Skipped: 0
+BUILD SUCCESS
+```
 
-## Roles y permisos
+### Tests existentes
 
-**USER**
-- Consultar catálogo de series
-- Consultar una serie
-- Calificar una serie
-- Consultar dashboard
+- Unit tests en RatingService (5 tests): crear rating, score inválido, rating duplicado, serie inexistente, serie inactiva.
+- Unit test en DashboardService (1 test): calcular dashboard.
+- Integration test (4 tests): flujo completo registro-login-serie-rating-dashboard, usuario sin rol admin no puede crear serie, email duplicado devuelve conflict, score fuera de rango devuelve bad request.
 
-**ADMIN**
-- Consultar catálogo
-- Consultar una serie
-- Gestionar series (crear, actualizar, activar/desactivar)
-- Consultar dashboard
+Los tests de integración usan H2 en modo PostgreSQL (perfil `test`), por lo que no requieren una instancia de PostgreSQL.
 
-## Validaciones principales
-
-- Score debe estar entre 1 y 5 (@Min, @Max)
-- Email debe ser único y tener formato válido (@Email, @NotBlank, @NotNull)
-- Password obligatoria y será hasheada
-- Título de serie es obligatorio (@NotBlank)
-- No se permiten ratings duplicados por usuario y serie
-
-## Seguridad
-
-- Hashing de contraseñas con BCrypt
-- Autenticación mediante JWT (tokens Bearer)
-- Endpoints protegidos por Spring Security
-- Control de roles por cada endpoint
-- Contraseñas nunca almacenadas en texto plano
-- Entidades JPA no expuestas directamente (usar DTOs)
-
-## Migraciones
-
-Versionadas con Flyway:
-- V1__create_users_table.sql
-- V2__create_series_table.sql
-- V3__create_ratings_table.sql
-
-## Testing
-
-- Unit tests en Services (reglas de negocio principales)
-- Integration tests flujos principales de API
-- Casos de prueba:
-  - crear rating correctamente
-  - rechazar score inválido
-  - rechazar rating duplicado
-  - rechazar serie inexistente
-  - rechazar serie inactiva
-  - calcular dashboard
-
-## Configuración local (desarrollo)
+## Ejecución local
 
 ### Requisitos
 
@@ -192,7 +200,7 @@ Abrir una terminal nueva y comprobar con `echo $env:DB_URL`.
 mvn spring-boot:run
 ```
 
-La API queda en `http://localhost:8080/api`.
+La aplicación queda en `http://localhost:8080`.
 
 ### Ejecutar los tests
 
@@ -200,22 +208,34 @@ La API queda en `http://localhost:8080/api`.
 mvn test
 ```
 
-Los tests de integración usan H2 en modo PostgreSQL (perfil `test`), por lo que no requieren una instancia de PostgreSQL.
+## Estado del proyecto
 
-## Criterios de aceptación
+El MVP actual está **funcional y probado localmente**.
 
-- [x] Un usuario puede registrarse
-- [x] Un usuario puede iniciar sesión
-- [x] La contraseña no se almacena en texto plano
-- [x] El sistema genera un JWT válido
-- [x] Se pueden listar series activas
-- [x] Un ADMIN puede crear/actualizar/activar/desactivar series
-- [x] El score únicamente puede estar entre 1 y 5
-- [x] El usuario no puede votar dos veces la misma serie
-- [x] No se puede votar una serie inexistente
-- [x] No se puede votar una serie inactiva
-- [x] Se muestra el promedio y cantidad de votos por serie
-- [x] El proyecto está organizado por capas
-- [x] Se utilizan DTOs
-- [x] Existe manejo global de errores
-- [x] Las credenciales sensibles no forman parte del repositorio
+### Funcionalidades completadas
+
+- [x] Registro de usuarios
+- [x] Inicio de sesión con JWT
+- [x] Catálogo de series activas
+- [x] Calificación de series (score 1-5)
+- [x] Prevención de voto duplicado
+- [x] Dashboard con métricas
+- [x] Frontend con Thymeleaf
+- [x] Manejo de JWT expirado
+- [x] Diseño responsive
+- [x] Swagger/OpenAPI
+- [x] Tests (10/10 OK)
+
+### Pruebas manuales realizadas
+
+- [x] Registro exitoso
+- [x] Login con credenciales correctas
+- [x] Login con credenciales incorrectas (muestra error)
+- [x] Catálogo de series
+- [x] Calificar una serie
+- [x] Intentar calificar dos veces (muestra 409)
+- [x] Dashboard con métricas
+- [x] Logout
+- [x] Acceso sin autenticación (redirige a login)
+- [x] JWT expirado (redirige a login)
+- [x] Diseño responsive en móvil
