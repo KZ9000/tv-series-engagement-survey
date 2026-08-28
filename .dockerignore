@@ -1,0 +1,30 @@
+# Build output
+target/
+
+# Git
+.git/
+.gitignore
+
+# Environment / secrets
+.env
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Local config
+application-local.yml
+
+# Documentation (not needed for build)
+*.md
